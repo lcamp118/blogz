@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Build A Blog</h1>
+    <form method='post'>
+        <table>
+            <tr>
+                <td>
+                    <label>
+                    Choose a Title For Your Entry: 
+                    <input type="text" name="title" />
+                    </label>
+                </td>
+                <td>
+                    <p class='error'>{{title_error}}</p>
+                </td>
+            </tr>
+        <tr>
+            <td>
+                <label>
+                Create Entry:
+                <textarea type="" name="body" row="10" cols ="30"></textarea>
+                </label>
+             </td>
+             <td>
+                <p class='error'>{{content_error}}</p>
+             </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="Done!" />
+            </td>
+        </tr> 
+    </table>
+    </form>
+    
+{% endblock %}

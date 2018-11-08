@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+        <nav>
+                <a href="/newpost">Create a New Post</a> |
+                <a href="/blog">View All Blog Entries</a> | 
+                <a href="/logout">Log Out</a>
+              </nav> 
+    <head>
+        <title>{{title}}</title>
+        <style>
+            .error{
+                color: red;
+            }
+        </style>
+    </head>
+<body>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>
