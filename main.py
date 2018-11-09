@@ -21,8 +21,14 @@ class Blog(db.Model):
 
 @app.route('/blog', methods=['POST','GET'])
 def display_blogs():
-    blogs = Blog.query.all()
-    return render_template('blogs.html',title="Build A Blog!!", blogs=blogs)
+    
+    blog_id = request.args.get('id')
+    if blog_id:
+        content = Blog.query.get(blog_id)
+        return render_template('blogpost.html', content = content)
+    else:
+        blogs = Blog.query.all()
+        return render_template('blogs.html',title="Build A Blog!!", blogs=blogs)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def index():
@@ -43,23 +49,13 @@ def index():
         new_post = Blog(blog_name,blog_content)
         db.session.add(new_post)
         db.session.commit()
-        return redirect('/blog')
+
+        if new_post:
+            post_id = new_post.id
+            blog_post = Blog.query.get(post_id)
+            return render_template('blogpost.html', content = blog_post)
     else:
         return render_template('newpost.html')
-
-        #TODO - Need to add the error message validation for the new post and add matching Jinja tags to the template "Newpost.html"
-
-
-#@app.route('/delete-task', methods=['POST'])
-#def delete_task():
-
-#    task_id = int(request.form['task-id'])
-#    task = Task.query.get(task_id)
-#    task.completed = True
-#    db.session.add(task)
-#    db.session.commit()
-
-#    return redirect('/')
 
 
 if __name__ == '__main__':

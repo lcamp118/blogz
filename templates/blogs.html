@@ -10,7 +10,7 @@
         <ul>
             {% for blog in blogs %}
             <li>
-                <p>{{blog.title}}</p>
+                <p><a href="./blog?id={{blog.id}}">{{blog.title}}</a></p>
                 <p>{{blog.body}}</p>
                 <hr />
                 </form>
