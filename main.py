@@ -76,6 +76,10 @@ def register():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+
+    login_error = ''
+    password_not_found = ''
+
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -83,15 +87,20 @@ def login():
         if user and user.password == password:
             session['email'] = email
             return redirect('/newpost')
-        else:
-            # TODO - explain why login failed
-            # if not user:
-                #return '<h1> Email address does not exist in our system. Please <a href="/register"> register here </a></h1>'
-            # if user and user.password != password
-                #return '<h1> Incorrect Password </h1>
-            return '<h1>Error!</h1>'
+        if not user:
+            email = email
+            login_error = 'Email address does not exist in our system. Please register'
+        if user and user.password != password:
+            email = email
+            password_not_found = "Incorrect Username or Password"
+        return render_template('login.html', login_error = login_error, password_not_found = password_not_found, email = email)
 
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    del session['email']
+    return redirect('/blog')
 
 @app.route('/blog', methods=['POST','GET'])
 def display_blogs():
