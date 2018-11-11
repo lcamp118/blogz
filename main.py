@@ -1,23 +1,97 @@
 
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:buildit@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogz@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
-
+app.secret_key = 'y337j899s098uji'
 
 class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
-    body = db.Column(db.String(1000))
+    body = db.Column(db.Text())
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
+        self.owner = owner
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    blogs = db.relationship('Blog', backref='owner')
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+
+    username_error = ''
+    password_error = ''
+    verify_error = ''
+    email_error = ''
+
+    invalid_char = ' '
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        verify = request.form['verify']
+
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user and not email =="" and not password == "" and not verify == "" and password == verify and len(email) > 3 and len(password) > 3 and len(verify) > 3:
+            new_user = User(email, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['email'] = email
+            return redirect('/newpost')
+        else:
+            if email == "" or len(email) <= 3:
+                email = email
+                email_error = "Please enter a valid email address"
+            if existing_user:
+                email = email
+                email_error = "Email belongs to registered user. Please Login"
+            else:
+                if password == "" or len(password) <= 3:
+                    password_error = "Please Enter a Valid Password"
+                if verify == "" or len(verify) <= 3:
+                    verify_error = "Please re-enter password"
+                if password != verify:
+                    verify_error = "Passwords do not match"
+
+            return render_template("register.html",email = email, email_error = email_error, password_error = password_error, verify_error=verify_error)
+
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            session['email'] = email
+            return redirect('/newpost')
+        else:
+            # TODO - explain why login failed
+            # if not user:
+                #return '<h1> Email address does not exist in our system. Please <a href="/register"> register here </a></h1>'
+            # if user and user.password != password
+                #return '<h1> Incorrect Password </h1>
+            return '<h1>Error!</h1>'
+
+    return render_template('login.html')
 
 @app.route('/blog', methods=['POST','GET'])
 def display_blogs():
@@ -56,7 +130,6 @@ def index():
             return render_template('blogpost.html', content = blog_post)
     else:
         return render_template('newpost.html')
-
 
 if __name__ == '__main__':
     app.run()
