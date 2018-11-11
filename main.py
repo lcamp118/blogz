@@ -28,9 +28,15 @@ class User(db.Model):
     password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, owner):
         self.email = email
         self.password = password
+
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'register', 'display_blogs', 'index']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -114,10 +120,11 @@ def display_blogs():
         return render_template('blogs.html',title="Build A Blog!!", blogs=blogs)
 
 @app.route('/newpost', methods=['POST', 'GET'])
-def index():
+def new_post():
 
     title_error = ''
     content_error = ''
+    owner = User.query.filter_by(email = session['email']).first()
 
     if request.method == 'POST':
         blog_name = request.form['title']
@@ -129,7 +136,7 @@ def index():
         if title_error != '' or content_error != '':
             return render_template('newpost.html',title_error=title_error,content_error=content_error)
 
-        new_post = Blog(blog_name,blog_content)
+        new_post = Blog(blog_name,blog_content,owner)
         db.session.add(new_post)
         db.session.commit()
 
@@ -139,6 +146,12 @@ def index():
             return render_template('blogpost.html', content = blog_post)
     else:
         return render_template('newpost.html')
+
+@app.route('/')
+def index():
+    authors = User.query.all()
+    return render_template('index.html', authors=authors)
+
 
 if __name__ == '__main__':
     app.run()

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Blog Authors</h1>
+    
+    {% if authors|length == 0 %}
+    <p>No authors yet</p>
+    {% else %}
+
+        <ul>
+            {% for author in authors %}
+            <li>
+                <p>{{author.email}}</p>
+                <hr />
+            </li>
+            {% endfor %}
+        </ul>
+
+    {% endif %}
+    
+{% endblock %}
