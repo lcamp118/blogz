@@ -10,7 +10,7 @@
         <ul>
             {% for author in authors %}
             <li>
-                <p>{{author.email}}</p>
+                <p><a href="./blog?user={{author.id}}">{{author.email}}</a></p>
                 <hr />
             </li>
             {% endfor %}

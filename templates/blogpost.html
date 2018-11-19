@@ -4,5 +4,8 @@
 
 <p>{{content.title}}</p>
 <p>{{content.body}}</p>
+<br>
+<br>
+<p>Written by: <a href="./blog?user={{content.owner.id}}">{{content.owner.email}}</a></p>
 
 {% endblock %}

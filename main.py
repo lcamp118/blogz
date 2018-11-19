@@ -28,9 +28,10 @@ class User(db.Model):
     password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
 
-    def __init__(self, email, password, owner):
+    def __init__(self, email, password):
         self.email = email
         self.password = password
+
 
 @app.before_request
 def require_login():
@@ -112,9 +113,14 @@ def logout():
 def display_blogs():
     
     blog_id = request.args.get('id')
+    user_id = request.args.get('user')
     if blog_id:
         content = Blog.query.get(blog_id)
-        return render_template('blogpost.html', content = content)
+        author = User.query.get(blog_id)
+        return render_template('blogpost.html', content = content, author=author)
+    if user_id:
+        all_posts = Blog.query.filter_by(owner_id=user_id).all()
+        return render_template('authorspage.html', allposts = all_posts)
     else:
         blogs = Blog.query.all()
         return render_template('blogs.html',title="Build A Blog!!", blogs=blogs)
@@ -143,7 +149,7 @@ def new_post():
         if new_post:
             post_id = new_post.id
             blog_post = Blog.query.get(post_id)
-            return render_template('blogpost.html', content = blog_post)
+            return render_template('blogpost.html', content = blog_post, author=owner)
     else:
         return render_template('newpost.html')
 
